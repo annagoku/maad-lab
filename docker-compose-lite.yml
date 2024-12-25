@@ -1,0 +1,39 @@
+version: '3'
+services:
+
+  postgres:
+    image: "postgres:15.2-alpine"
+    container_name: ecommerce-postgres
+    restart: always
+    volumes:
+      - ./docker-postgres-init.sql:/docker-entrypoint-initdb.d/docker-postgres-init.sql
+      - ecommerce-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks: 
+      - ecommerce-network
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    environment: 
+        PGADMIN_DEFAULT_EMAIL: "anna.goku1981@gmail.com"
+        PGADMIN_DEFAULT_PASSWORD: "test123!"
+    volumes:
+      - pg-admin-data:/var/lib/pgadmin
+    networks: 
+      - ecommerce-network
+    ports: 
+        - "16543:80" #porta esposta dal c : immagine esposta dall'immagine
+    depends_on: 
+        - postgres  
+networks:
+  ecommerce-network:
+    driver: bridge
+
+volumes:
+  ecommerce-data:
+  pg-admin-data:
