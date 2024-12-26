@@ -28,7 +28,7 @@ public class Chart {
         price += ci.getPrice();
     }
 
-    public String getRedisKey() {
+    public String redisKey() {
         return REDIS_KEY_PREFIX+getUserId();
     }
 }
