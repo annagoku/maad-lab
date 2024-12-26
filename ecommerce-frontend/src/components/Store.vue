@@ -1,42 +1,26 @@
 
 <template>
   <div class="container">
-      <Card>
-      <template #title> 
-        <div class="row w-100">
-          <span class="col">Acquista online</span>
-          <span class="relative col "><Button icon="pi pi-shopping-cart" class="absolute right-0 mr-3" text raised rounded size="large" @click="showCart"></Button><Badge class="absolute right-0" v-if="store.cart.itemNumber > 0" :value="store.cart.itemNumber"></Badge></span>
-        </div>
+    <DataView :layout="layout" :value="storeItems" >
+      <template #grid="slotProps">
         
-        
-         
-                      
-      </template>
-      <template #content>
-              <DataView :layout="layout" :value="storeItemsType" >
-                <template #grid="slotProps">
-                  
-                  <div class="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
-                        <div class="p-4 border-1 surface-border surface-card border-round">
-                          <div class="flex flex-column align-items-center gap-3 py-5">
-                                <div class="text-2xl font-bold"><img class="w-10rem shadow-2 border-round" :src="slotProps.data.picturePath"/></div>
-                            </div>
-                            <div class="flex flex-column align-items-center gap-3 py-5">
-                                <div class="text-2xl font-bold">{{ slotProps.data.name }}</div>
-                            </div>
-                            <div class="flex align-items-center justify-content-between">
-                                <span class="text-2xl font-semibold">€ {{ slotProps.data.price }}</span>
-                               
-                                <Button icon="pi pi-shopping-cart" rounded @click.stop.prevent="createStoreItem(slotProps.data)"></Button>
-                            </div>
-                        </div>
+        <div class="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
+              <div class="p-4 border-1 surface-border surface-card border-round">
+                <div class="flex flex-column align-items-center gap-3 py-5">
+                      <div class="text-2xl font-bold"><img class="w-10rem shadow-2 border-round" :src="slotProps.data.picturePath"/></div>
                   </div>
-                </template>
-              </DataView>
-          
+                  <div class="flex flex-column align-items-center gap-3 py-5">
+                      <div class="text-2xl font-bold">{{ slotProps.data.name }}</div>
+                  </div>
+                  <div class="flex align-items-center justify-content-between">
+                      <span class="text-2xl font-semibold">€ {{ slotProps.data.price }}</span>
+                      
+                      <Button icon="pi pi-shopping-cart" rounded @click.stop.prevent="createStoreItem(slotProps.data)"></Button>
+                  </div>
+              </div>
+        </div>
       </template>
-  </Card>
-    
+    </DataView>   
 
 </div>
 
@@ -58,7 +42,7 @@
             <label for="storeItemTypeName">Articolo</label>
         </span>
         <span  class="p-float-label col-xs-12 col-md-4 mt-3">
-          <Dropdown id="size" @change="getQuantityForStoreItemType($event)" v-model="newStoreItem.size"  :options="storeItemSize"  placeholder="Seleziona una taglia" :class="'w-full'" ></Dropdown>
+          <Dropdown id="size" @change="getQuantityForStoreItem($event)" v-model="newStoreItem.size"  :options="storeItemSize"  placeholder="Seleziona una taglia" :class="'w-full'" ></Dropdown>
                  <label for="size">Taglie disponibili</label>   
         </span>
       </div>
@@ -74,15 +58,6 @@
         <Button class="btn-cancel" icon="pi pi-times" label="Annulla" @click.stop.prevent="cancelStoreItem()" style="margin-left: 0.5em"></Button>
       </template>
 </Dialog>
-
-
-
-
-
-
-
-
-
 
 <!-- DIALOG CARRELLO -->
 <Dialog v-model:visible="viewCart" modal header="Carrello acquisti" :style="{ width: '75vw' }" :breakpoints="{ '960px': '75vw', '641px': '100vw' }">
@@ -182,7 +157,7 @@ import Dropdown from 'primevue/dropdown';
 
 
 export default {
-  name: "EcommerceView",
+  name: "Store",
   data() {
     return {
       layout: 'grid',
@@ -192,16 +167,15 @@ export default {
       cartConfirmed: false,
       itemToBuy: null,
       newStoreItem:{
-        storeItemType:null,
+        storeItem:null,
         size:null,
         quantity:null
       },
       storeItemSize: [],
       storeItemQuantity: [],
       selectedType: null,
-      selectedItemType: null,
-      storeItemsType: [],
-      subscriptionTypes: [],
+      selectedItem: null,
+      storeItems: [],
       paymentMethods: ['Carta di credito', 'Bonifico','In contrassegno'],
       paymentMethod: null,
       orderId: null
@@ -222,10 +196,10 @@ export default {
   mounted : function () {
     
     
-    storeItemService().getStoreItemType().then((data)=> {
-      this.storeItemsType = data;
-      console.log("this.storeItemsType");
-      console.log(this.storeItemsType);
+    storeItemService().getStoreItem().then((data)=> {
+      this.storeItems = data;
+      console.log("this.storeItems");
+      console.log(this.storeItems);
     });
 
     console.log("smartphone"+useStore().smartphone);
@@ -235,10 +209,10 @@ export default {
     
     createStoreItem: function(s){
       if(!this.cartConfirmed) {
-        storeItemService().getSizeForStoreItemType(s.name).then((data)=>{
+        storeItemService().getSizeForStoreItem(s.name).then((data)=>{
           this.storeItemSize=data;
         }).catch(e=>{});
-        storeItemService().getSizeForStoreItemType(s.name).then((data)=>{
+        storeItemService().getSizeForStoreItem(s.name).then((data)=>{
           this.storeItemSize=data;
         }).catch(e=>{});
 
@@ -249,11 +223,11 @@ export default {
         this.newStoreItem={
           size:null,
           quantity: null,
-          storeItemType:null
+          storeItem:null
         };
-        this.newStoreItem.storeItemType=s;
+        this.newStoreItem.storeItem=s;
         console.log(this.newStoreItem);
-        this.selectedItemType=s;
+        this.selectedItem=s;
         this.showDialogItem=true;
 
       }else {
@@ -263,9 +237,9 @@ export default {
     },
 
     getQuantityForStoreItemType: function(event){
-      var name=this.selectedItemType.name;
+      var name=this.selectedItem.name;
       var size=this.newStoreItem.size;
-      storeItemService().getQuantityForStoreItemType(name,size).then((data=>{
+      storeItemService().getQuantityForStoreItem(name,size).then((data=>{
          this.storeItemQuantity=data;
          console.log(this.storeItemQuantity);
       })).catch(e=>{});
@@ -285,7 +259,7 @@ export default {
       this.newStoreItem={
           size:null,
           quantity: null,
-          storeItemType:null
+          storeItem:null
         };
     },
 
@@ -302,7 +276,7 @@ export default {
       this.newStoreItem={
           size:null,
           quantity: null,
-          storeItemType:null
+          storeItem:null
         };
 
     },
@@ -341,7 +315,6 @@ export default {
           email: store.user.email
         },
         items: store.cart.items,
-        subscriptions: store.cart.subscriptions
       };
 
 

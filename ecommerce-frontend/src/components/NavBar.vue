@@ -21,12 +21,12 @@
                 
                 </Menu>
 
-      <div v-if="store.area == 'public'" class="collapse navbar-collapse" id="navbarCollapse">
+      <!--div v-if="store.area == 'public'" class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mx-2">
          
           <li  class="nav-item mx-2"><a  id="navlink-home"  class="nav-link active" href="#"  @click="setMenuActive($event.target)">Home</a></li>
           
-          <li class="nav-item mx-2"><a id="navlink-courses" class="nav-link"   @click="setMenuActive($event.target), scrollTo('courses')">Attività</a></li>
+          <li class="nav-item mx-2"><a id="navlink-store" class="nav-link"   @click="setMenuActive($event.target), scrollTo('courses')">Attività</a></li>
           <li class="nav-item mx-2"><a id="navlink-teachers" class="nav-link"   @click="setMenuActive($event.target), scrollTo('teachers')">Insegnanti</a></li>
           <li class="nav-item mx-2"><a id="navlink-contacts" class="nav-link"   @click="setMenuActive($event.target), scrollTo('contacts')">Contatti</a></li>
 
@@ -45,7 +45,7 @@
           <li v-if="!store.smartphone" class="nav-item mx-2"><a id="navlink-order" class="nav-link "  @click="setMenuActive($event.target),goToOrders()">Ordini</a></li>
           <li class="nav-item mx-2"><a id="navlink-commerce" class="nav-link "  @click="setMenuActive($event.target), goToECommerce()">E-commerce</a></li>
         </ul>
-      </div>
+      </div-->
 
       <a v-if="store.user && !store.smartphone" class="nav-link " id="dropdownMenuUser" @click="toggleMenuUser" aria-haspopup="true" aria-controls="overlay_menu" href="#" >
                 <Avatar :image="store.user.picture" class="mr-2" size="large" shape="circle"

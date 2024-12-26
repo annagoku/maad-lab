@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import axios from 'axios';
 import { useStore } from '@/stores/store'
 
-const serverBaseUrl = "http://localhost:8079/api/ordini/v1";
+const serverBaseUrl = "http://localhost:8080/api/ecommerce/v1";
 axios.defaults.withCredentials = false
 
 
@@ -14,8 +14,8 @@ export const storeItemService = defineStore('storeItemService', {
   },
   actions: {
   
-    async getStoreItemType(){
-      const url = serverBaseUrl+"/storeItemType";
+    async getStoreItem(){
+      const url = serverBaseUrl+"/store";
       const store = useStore();
       store.loading = true;
       try {
@@ -31,7 +31,7 @@ export const storeItemService = defineStore('storeItemService', {
       }
     }, 
 
-    async getSizeForStoreItemType(name){
+    async getSizeForStoreItem(name){
       const url = serverBaseUrl+"/storeItemType/"+name+"/size";
       const store = useStore();
       store.loading = true;
@@ -46,7 +46,7 @@ export const storeItemService = defineStore('storeItemService', {
       }
     }, 
 
-    async getQuantityForStoreItemType(name,size){
+    async getQuantityForStoreItem(name,size){
       const url = serverBaseUrl+"/storeItemType/"+name+"/quantity/"+size;
       const store = useStore();
       store.loading = true;
