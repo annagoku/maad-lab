@@ -1,14 +1,22 @@
 package it.unito.annasabatelli.ecommerce.backend.controller;
 
 
-import it.unito.annasabatelli.ecommerce.backend.model.User;
-import it.unito.annasabatelli.ecommerce.backend.repo.ChartRepository;
-import it.unito.annasabatelli.ecommerce.backend.repo.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import it.unito.annasabatelli.ecommerce.backend.model.jpa.StoreItem;
+import it.unito.annasabatelli.ecommerce.backend.model.redis.Chart;
+import it.unito.annasabatelli.ecommerce.backend.model.redis.ChartItem;
+import it.unito.annasabatelli.ecommerce.backend.model.jpa.User;
+import it.unito.annasabatelli.ecommerce.backend.jparepo.StoreRepository;
+import it.unito.annasabatelli.ecommerce.backend.jparepo.UserRepository;
+import it.unito.annasabatelli.ecommerce.backend.redis.ChartService;
 import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +28,75 @@ import java.util.List;
 @RequestMapping("/api/ecommerce/v1")
 public class EcommerceController {
     static final Logger LOGGER = LoggerFactory.getLogger(EcommerceController.class);
+
     @Autowired // dependency injection
     UserRepository userRepository;
     @Autowired // dependency injection
-    ChartRepository chartRepository;
+    StoreRepository storeRepository;
 
-    //lista di tutti gli utenti
+    @Autowired
+    ChartService chartService;
+
+    /**
+     * GET Carrello per utente
+     * @return Carrello dell'utente
+     */
+    @GetMapping("/chart/{mail}")
+    public ResponseEntity<Chart> getChartByMail(@NotNull @PathVariable String mail) throws JsonProcessingException {
+        checkUser(mail);
+
+        Chart c = chartService.getChart(mail);
+        if(c == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        else {
+            return new ResponseEntity<>(c, HttpStatus.OK);
+
+        }
+    }
+
+    @PostMapping("/chart/{mail}/add-item")
+    public ResponseEntity<Chart> addItemToChart(@NotNull @PathVariable String mail,
+                                                @NotNull @RequestBody ChartItem chartItem) throws JsonProcessingException {
+        checkUser(mail);
+
+        Chart c = chartService.addItem(mail, chartItem);
+        return new ResponseEntity<>(c, HttpStatus.OK);
+
+    }
+
+    @PostMapping("/chart/{mail}")
+    public ResponseEntity<Chart> saveChart(@NotNull @PathVariable String mail,
+                                                @NotNull @RequestBody Chart chart) throws JsonProcessingException {
+        checkUser(mail);
+        if(!mail.equalsIgnoreCase(chart.getUserId())) {
+            throw new ValidationException("userid non coerente con quello all'interno del carrello");
+        }
+        Chart c = chartService.saveChart(chart);
+        return new ResponseEntity<>(c, HttpStatus.OK);
+
+    }
+
+    private void checkUser(String userEmail) {
+        User u = userRepository.findByEmail(userEmail);
+        if(u == null) {
+            throw new ValidationException("L'utente "+userEmail+" non esiste");
+        }
+    }
+
+    /**
+     * lista di tutti gli oggetti dello store
+     *
+     */
+    @GetMapping("/store")
+    public ResponseEntity<List<StoreItem>> getAllStoreItems() {
+
+        List<StoreItem> items= new ArrayList<>();
+
+        storeRepository.findAll().forEach(items::add);
+        return new ResponseEntity<>(items, HttpStatus.OK);
+    }
+
     @GetMapping("/user")
     public ResponseEntity<List<User>> getAllUsers() {
 

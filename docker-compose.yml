@@ -17,16 +17,36 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
 
-  #redis:
-  #  image: redis:alpine3.16
-  #  container_name: ecommerce-redis
-  #  ports:
-  #    - 
-  
+  redis:
+    image: redis:alpine3.16
+    container_name: ecommerce-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks: 
+      - ecommerce-network
+        
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      REDIS_HOSTS: redis
+      REDIS_HOST: redis
+      REDIS_PORT: redis:6379
+      #REDIS_PASSWORD: ${REDIS_PASSWORD}
+      #HTTP_USER: admin
+      #HTTP_PASSWORD: root
+    ports:
+      - 8081:8081
+    networks:
+      - ecommerce-network
+
   pgadmin:
     image: dpage/pgadmin4
     environment: 
-        PGADMIN_DEFAULT_EMAIL: "anna.goku1981@gmail.com"
+        PGADMIN_DEùFAULT_EMAIL: "anna.goku1981@gmail.com"
         PGADMIN_DEFAULT_PASSWORD: "test123!"
     volumes:
       - pg-admin-data:/var/lib/pgadmin
@@ -70,3 +90,4 @@ networks:
 volumes:
   ecommerce-data:
   pg-admin-data:
+  redis-data:

@@ -1,6 +1,6 @@
-package it.unito.annasabatelli.ecommerce.backend.repo;
+package it.unito.annasabatelli.ecommerce.backend.jparepo;
 
-import it.unito.annasabatelli.ecommerce.backend.model.User;
+import it.unito.annasabatelli.ecommerce.backend.model.jpa.User;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

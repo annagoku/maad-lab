@@ -1,4 +1,4 @@
-package it.unito.annasabatelli.ecommerce.backend.model;
+package it.unito.annasabatelli.ecommerce.backend.model.jpa;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
