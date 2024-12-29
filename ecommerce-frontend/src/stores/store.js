@@ -9,7 +9,7 @@ export const useStore = defineStore('store', {
     loading: false,
     alerts: [],
     messages: [],
-    smartphone: false,
+    showCartDialog: false,
     cart: {
       items: [],
       globalTotalPrice: 0.0,
@@ -35,25 +35,16 @@ export const useStore = defineStore('store', {
     addError(err) {
       this.alerts.push(err);
     },
-    isSmartPhone() {
-      return this.smartphone;
+    showCart() {
+      this.showCartDialog = true;
     },
-    setSmartPhone(isSmart) {
-      this.smartphone = isSmart;
+    hideCart() {
+      this.showCartDialog = false;
     },
-    
     addItemToCart(item) {
       this.cart.items.push(item);
       this.cart.itemNumber+=item.quantity;
       this.cart.globalTotalPrice += (item.storeItemType.price*item.quantity);
-    },
-    addSubscriptionToCart(sub) {
-      this.cart.itemNumber++;
-      this.cart.globalTotalPrice = this.cart.globalTotalPrice + sub.subscriptionType.price;
-    },
-    removeSubscriptionFromCart(index, sub) {
-      this.cart.itemNumber--;
-      this.cart.globalTotalPrice = this.cart.globalTotalPrice - sub.subscriptionType.price;
     },
     removeItemFromCart(index, item){
       this.cart.items.splice(index,1);

@@ -33,6 +33,8 @@ import 'primeflex/primeflex.css';
 import './assets/main.css'
 import Tooltip from 'primevue/tooltip';
 
+// import as directive
+import BadgeDirective from 'primevue/badgedirective';
 
 
 library.add(fas, far, fab);
@@ -45,16 +47,7 @@ app.component('font-awesome-icon', FontAwesomeIcon);
 app.use(createPinia());
 app.use(router);
 app.directive('tooltip', Tooltip);
-app.use(vue3GoogleLogin, {
-    clientId: '611173840916-5v68c71u7pg7atk55nhofes0srh8b287.apps.googleusercontent.com'   //Initialize the vue3-google-login plugin in main.js, this will register a component GoogleLogin globally
-});
-/*
-app.use(VueGoogleMaps, {
-    load: {
-        key: '',
-        language: 'it',
-    }
-});
-*/
 
+
+app.directive('badge', BadgeDirective);
 app.mount('#app')

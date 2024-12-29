@@ -8,14 +8,14 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ChartItem {
+public class ShoppingCartItem {
     @NotNull
     private StoreItem item;
     @Min(1)
     private int quantity;
     private double price;
 
-    public ChartItem(int quantity, StoreItem item) {
+    public ShoppingCartItem(int quantity, StoreItem item) {
         this.item = item;
         this.quantity = quantity;
         this.price = quantity * item.getPrice();

@@ -2,21 +2,18 @@ package it.unito.annasabatelli.ecommerce.backend.controller;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.unito.annasabatelli.ecommerce.backend.model.jpa.StoreItem;
-import it.unito.annasabatelli.ecommerce.backend.model.redis.Chart;
-import it.unito.annasabatelli.ecommerce.backend.model.redis.ChartItem;
+import it.unito.annasabatelli.ecommerce.backend.model.redis.ShoppingCart;
+import it.unito.annasabatelli.ecommerce.backend.model.redis.ShoppingCartItem;
 import it.unito.annasabatelli.ecommerce.backend.model.jpa.User;
 import it.unito.annasabatelli.ecommerce.backend.jparepo.StoreRepository;
 import it.unito.annasabatelli.ecommerce.backend.jparepo.UserRepository;
-import it.unito.annasabatelli.ecommerce.backend.redis.ChartService;
-import jakarta.validation.Valid;
+import it.unito.annasabatelli.ecommerce.backend.redis.CartService;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,17 +32,17 @@ public class EcommerceController {
     StoreRepository storeRepository;
 
     @Autowired
-    ChartService chartService;
+    CartService cartService;
 
     /**
      * GET Carrello per utente
      * @return Carrello dell'utente
      */
-    @GetMapping("/chart/{mail}")
-    public ResponseEntity<Chart> getChartByMail(@NotNull @PathVariable String mail) throws JsonProcessingException {
+    @GetMapping("/cart/{mail}")
+    public ResponseEntity<ShoppingCart> getCartByMail(@NotNull @PathVariable String mail) throws JsonProcessingException {
         checkUser(mail);
 
-        Chart c = chartService.getChart(mail);
+        ShoppingCart c = cartService.getCart(mail);
         if(c == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -55,24 +52,24 @@ public class EcommerceController {
         }
     }
 
-    @PostMapping("/chart/{mail}/add-item")
-    public ResponseEntity<Chart> addItemToChart(@NotNull @PathVariable String mail,
-                                                @NotNull @RequestBody ChartItem chartItem) throws JsonProcessingException {
+    @PostMapping("/cart/{mail}/add-item")
+    public ResponseEntity<ShoppingCart> addItemToCart(@NotNull @PathVariable String mail,
+                                                       @NotNull @RequestBody ShoppingCartItem shoppingCartItem) throws JsonProcessingException {
         checkUser(mail);
 
-        Chart c = chartService.addItem(mail, chartItem);
+        ShoppingCart c = cartService.addItem(mail, shoppingCartItem);
         return new ResponseEntity<>(c, HttpStatus.OK);
 
     }
 
-    @PostMapping("/chart/{mail}")
-    public ResponseEntity<Chart> saveChart(@NotNull @PathVariable String mail,
-                                                @NotNull @RequestBody Chart chart) throws JsonProcessingException {
+    @PostMapping("/cart/{mail}")
+    public ResponseEntity<ShoppingCart> saveChart(@NotNull @PathVariable String mail,
+                                                  @NotNull @RequestBody ShoppingCart shoppingCart) throws JsonProcessingException {
         checkUser(mail);
-        if(!mail.equalsIgnoreCase(chart.getUserId())) {
+        if(!mail.equalsIgnoreCase(shoppingCart.getUserId())) {
             throw new ValidationException("userid non coerente con quello all'interno del carrello");
         }
-        Chart c = chartService.saveChart(chart);
+        ShoppingCart c = cartService.saveCart(shoppingCart);
         return new ResponseEntity<>(c, HttpStatus.OK);
 
     }
@@ -96,63 +93,5 @@ public class EcommerceController {
         storeRepository.findAll().forEach(items::add);
         return new ResponseEntity<>(items, HttpStatus.OK);
     }
-
-    @GetMapping("/user")
-    public ResponseEntity<List<User>> getAllUsers() {
-
-        List<User> users= new ArrayList<>();
-
-        userRepository.findAll().forEach(users::add);
-        return new ResponseEntity<>(users, HttpStatus.OK);
-    }
-
-    //Recupero informazioni utente da mail
-    @GetMapping("/user/{mail}")
-    public ResponseEntity<User> getUserByMail (@NotNull @PathVariable String mail){
-
-        User userByMail=userRepository.findByEmail(mail);
-
-        return new ResponseEntity<>(userByMail, HttpStatus.OK);
-    }
-
-
-   //aggiornamento dati utente recuperato a DB tramite mail
-    @PostMapping (value="/user/{mail}/update")
-    public ResponseEntity<User> updateUser (@NotNull @PathVariable String mail, @Valid @RequestBody User user) {
-        //l'annotation significa che il servizio REST con la post
-        //prendo in base alla email e poi aggiorno solo i campi facoltativi
-        User userToChange=userRepository.findByEmail(mail);
-
-        if (userToChange == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        userToChange.setBirthdate(user.getBirthdate());
-        userRepository.save(userToChange);
-        return new ResponseEntity<>(userToChange, HttpStatus.OK);
-    }
-
-
-
-
-    //Creazione nuovo utente
-    @PostMapping(value="/user")
-
-    public ResponseEntity<User> createNewUser(@Valid @RequestBody User user) {
-
-
-        User userFound=userRepository.findByEmail(user.getEmail());
-
-        //quando un utente viene creato il ruolo di default è student
-        if (userFound==null){
-            userFound = userRepository.save(user);
-            return new ResponseEntity<>(userFound, HttpStatus.CREATED);
-
-        }
-        else{
-            return new ResponseEntity<>(userFound, HttpStatus.OK);
-        }
-    }
-
 
 }

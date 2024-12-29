@@ -1,21 +1,21 @@
 
 <template>
   <div class="container">
-    <DataView :layout="layout" :value="storeItems" >
+    <DataView layout="grid" :value="storeItems" >
       <template #grid="slotProps">
         
-        <div class="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
+        <div v-for="item in slotProps.items" class="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
               <div class="p-4 border-1 surface-border surface-card border-round">
                 <div class="flex flex-column align-items-center gap-3 py-5">
-                      <div class="text-2xl font-bold"><img class="w-10rem shadow-2 border-round" :src="slotProps.data.picturePath"/></div>
+                     <div class="text-2xl font-bold"><img class="w-10rem shadow-2 border-round" :src="item.picturePath"/></div>
                   </div>
                   <div class="flex flex-column align-items-center gap-3 py-5">
-                      <div class="text-2xl font-bold">{{ slotProps.data.name }}</div>
+                      <div class="text-2xl font-bold">{{ item.name }}</div>
                   </div>
                   <div class="flex align-items-center justify-content-between">
-                      <span class="text-2xl font-semibold">€ {{ slotProps.data.price }}</span>
+                      <span class="text-2xl font-semibold">€ {{ item.price }}</span>
                       
-                      <Button icon="pi pi-shopping-cart" rounded @click.stop.prevent="createStoreItem(slotProps.data)"></Button>
+                      <Button :disabled="!store.user" icon="pi pi-shopping-cart" rounded @click.stop.prevent="createStoreItem(item)"></Button>
                   </div>
               </div>
         </div>
@@ -60,7 +60,7 @@
 </Dialog>
 
 <!-- DIALOG CARRELLO -->
-<Dialog v-model:visible="viewCart" modal header="Carrello acquisti" :style="{ width: '75vw' }" :breakpoints="{ '960px': '75vw', '641px': '100vw' }">
+<Dialog v-model:visible="store.showCartDialog" modal header="Carrello acquisti" :style="{ width: '75vw' }" :breakpoints="{ '960px': '75vw', '641px': '100vw' }">
   <template #header>
     <div class="row">
       <div class="col-xs-12 ">
@@ -118,7 +118,7 @@
 </Card>
 
     <template #footer>
-        <Button label="Annulla"  @click="hideCart"  text />
+        <Button label="Chiudi"  @click="store.hideCart()"  text />
         <Button v-if="!cartConfirmed && store.cart.itemNumber> 0" label="ACQUISTA" @click="confirmPurchase"  autofocus />
         <Button v-if="cartConfirmed" label="Conferma Pagamento" @click="confirmPayment"  autofocus />
     </template>
@@ -132,7 +132,7 @@
 
 </template>
 <script>
-import {DayPilot} from '@daypilot/daypilot-lite-vue'
+//import {DayPilot} from '@daypilot/daypilot-lite-vue'
 import TabView from 'primevue/tabview';
 import Tag from 'primevue/tag';
 import TabPanel from 'primevue/tabpanel';
@@ -145,12 +145,12 @@ import Badge from 'primevue/badge';
 import DataView from 'primevue/dataview';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import DataViewLayoutOptions from 'primevue/dataviewlayoutoptions';
+//import DataViewLayoutOptions from 'primevue/dataviewlayoutoptions';
 import Card from 'primevue/card';
 import { useStore } from '@/stores/store';
 import { orderService } from '@/stores/orderService';
 import { storeItemService } from '@/stores/storeItemService';
-import {format, parse, add, lastDayOfMonth, startOfHour} from 'date-fns';
+//import {format, parse, add, lastDayOfMonth, startOfHour} from 'date-fns';
 import InlineMessage from 'primevue/inlinemessage';
 import Image from 'primevue/image';
 import Dropdown from 'primevue/dropdown';
@@ -197,7 +197,9 @@ export default {
     
     
     storeItemService().getStoreItem().then((data)=> {
-      this.storeItems = data;
+      //this.storeItems = data;
+      this.storeItems = [{name: "Mug", picturePath: "/storeitems/mug.png", price: "8" }]
+      
       console.log("this.storeItems");
       console.log(this.storeItems);
     });

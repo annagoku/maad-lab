@@ -11,19 +11,19 @@ import java.util.List;
 
 @Getter
 @Setter @NoArgsConstructor
-public class Chart {
-    public static final String REDIS_KEY_PREFIX = "chart:";
+public class ShoppingCart {
+    public static final String REDIS_KEY_PREFIX = "cart:";
     @NotNull
     private String userId;
     @NotNull
-    private List<ChartItem> items = new ArrayList<>();
+    private List<ShoppingCartItem> items = new ArrayList<>();
 
     private double price = 0;
     public void addItem(int quantity, StoreItem item) {
-        ChartItem ci = new ChartItem(quantity, item);
+        ShoppingCartItem ci = new ShoppingCartItem(quantity, item);
         addItem(ci);
     }
-    public void addItem(ChartItem ci) {
+    public void addItem(ShoppingCartItem ci) {
         items.add(ci);
         price += ci.getPrice();
     }

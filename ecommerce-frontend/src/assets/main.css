@@ -3,6 +3,10 @@
   --bs-indigo: #b51c1a;
 }
 
+a {
+  text-decoration: none;
+}
+
 .text-primary {
   color: #b51c1a !important;  
 }
