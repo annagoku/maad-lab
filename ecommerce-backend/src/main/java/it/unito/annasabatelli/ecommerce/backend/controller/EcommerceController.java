@@ -2,6 +2,8 @@ package it.unito.annasabatelli.ecommerce.backend.controller;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import it.unito.annasabatelli.ecommerce.backend.jparepo.StockRepository;
+import it.unito.annasabatelli.ecommerce.backend.model.jpa.StockItem;
 import it.unito.annasabatelli.ecommerce.backend.model.jpa.StoreItem;
 import it.unito.annasabatelli.ecommerce.backend.model.redis.ShoppingCart;
 import it.unito.annasabatelli.ecommerce.backend.model.redis.ShoppingCartItem;
@@ -11,6 +13,7 @@ import it.unito.annasabatelli.ecommerce.backend.jparepo.UserRepository;
 import it.unito.annasabatelli.ecommerce.backend.redis.CartService;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotNull;
+import jakarta.websocket.server.PathParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +33,8 @@ public class EcommerceController {
     UserRepository userRepository;
     @Autowired // dependency injection
     StoreRepository storeRepository;
-
+    @Autowired // dependency injection
+    StockRepository stockRepository;
     @Autowired
     CartService cartService;
 
@@ -63,7 +67,7 @@ public class EcommerceController {
     }
 
     @PostMapping("/cart/{mail}")
-    public ResponseEntity<ShoppingCart> saveChart(@NotNull @PathVariable String mail,
+    public ResponseEntity<ShoppingCart> saveCart(@NotNull @PathVariable String mail,
                                                   @NotNull @RequestBody ShoppingCart shoppingCart) throws JsonProcessingException {
         checkUser(mail);
         if(!mail.equalsIgnoreCase(shoppingCart.getUserId())) {
@@ -94,4 +98,21 @@ public class EcommerceController {
         return new ResponseEntity<>(items, HttpStatus.OK);
     }
 
+    /**
+     * lista di tutti gli oggetti dello store
+     *
+     */
+    @GetMapping("/store/{storeItemId}/sizes")
+    public ResponseEntity<List<StockItem>> getSizesForStoreItem(@NotNull @PathVariable long storeItemId ) {
+
+        List<StockItem> list = stockRepository.findByStoreItemId(storeItemId);
+
+        if(list.size()>0) {
+            return new ResponseEntity<>(list, HttpStatus.OK);
+
+        }
+        else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }

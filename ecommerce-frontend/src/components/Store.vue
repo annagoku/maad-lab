@@ -4,13 +4,14 @@
     <DataView layout="grid" :value="storeItems" >
       <template #grid="slotProps">
         
-        <div v-for="item in slotProps.items" class="col-12 sm:col-6 lg:col-12 xl:col-4 p-2">
+        <div v-for="item in slotProps.items" class="col-4 p-2">
               <div class="p-4 border-1 surface-border surface-card border-round">
                 <div class="flex flex-column align-items-center gap-3 py-5">
                      <div class="text-2xl font-bold"><img class="w-10rem shadow-2 border-round" :src="item.picturePath"/></div>
                   </div>
                   <div class="flex flex-column align-items-center gap-3 py-5">
                       <div class="text-2xl font-bold">{{ item.name }}</div>
+                      <div class="text-m ">{{ item.description }}</div>
                   </div>
                   <div class="flex align-items-center justify-content-between">
                       <span class="text-2xl font-semibold">€ {{ item.price }}</span>
@@ -29,7 +30,7 @@
 <Dialog v-model:visible="showDialogItem" modal header="Dettagli acquisto store" :style="{ width: '50vw' }" :breakpoints="{ '960px': '75vw', '641px': '100vw' }">
       <div class="row pt-3">
         <span class="p-float-label col-xs-6 col-md-4">
-              <Image :src="selectedItemType.picturePath" alt="Image" width="250" preview>
+              <Image :src="selectedStoreItem.storeItem.picturePath" alt="Image" width="250" preview>
                 <template #indicator>
                     <i class="pi pi-check"></i>
                 </template>
@@ -38,18 +39,18 @@
       </div>
       <div class="row py-5">
         <span class="p-float-label col-xs-12 col-md-4 mt-3">
-            <InputText :class="'w-full'" id="storeItemTypeName"  disabled v-model="selectedItemType.name" />
+            <InputText :class="'w-full'" id="storeItemTypeName"  disabled v-model="selectedStoreItem.storeItem.name" />
             <label for="storeItemTypeName">Articolo</label>
         </span>
         <span  class="p-float-label col-xs-12 col-md-4 mt-3">
-          <Dropdown id="size" @change="getQuantityForStoreItem($event)" v-model="newStoreItem.size"  :options="storeItemSize"  placeholder="Seleziona una taglia" :class="'w-full'" ></Dropdown>
+          <Dropdown id="size" v-model="selectedStoreItem.size" @change="getQuantityForSize($event)" :options="storeItemSize" optionLabel="size"  placeholder="Seleziona una taglia" :class="'w-full'" ></Dropdown>
                  <label for="size">Taglie disponibili</label>   
         </span>
       </div>
       <div class="row py-0 py-md-5">
         <span class="p-float-label col-xs-12 col-md-4">
-          <Dropdown id="quantity" v-model="newStoreItem.quantity" :disabled="!newStoreItem.size" :options="storeItemQuantity" placeholder="Seleziona una quantità" :class="'w-full'"/>
-                 <label for="size">Quantità</label>   
+          <InputNumber :disabled="!selectedStoreItem.size" v-model="selectedStoreItem.quantity" inputId="minmax" :min="1" />
+          <label for="size">Quantità</label>   
         </span>
         
       </div>
@@ -76,38 +77,29 @@
 
 
 <DataTable  v-if="store.cart.items.length>0" :value="store.cart.items" >
-    <Column class="smartcol" v-if="!store.smartphone" field="storeItemType.name" header="Nome"></Column>
-    <Column class="smartcol" v-if="!store.smartphone"  header="Immagine">
+    <Column class="smartcol" field="storeItem.name" header="Nome"></Column>
+    <Column class="smartcol"  header="Immagine">
       <template #body="slotProps">
-        <img class="w-5rem shadow-2 border-round" :src="slotProps.data.storeItemType.picturePath"/>
+        <img class="w-5rem shadow-2 border-round" :src="slotProps.data.storeItem.picturePath"/>
       </template>
       
     </Column>
-    <Column class="smartcol" v-if="store.smartphone" header="Articolo">
+    
+    <Column class="smartcol" field="size.size" header="Taglia"></Column>
+    <Column class="smartcol" field="storeItem.price" header="Prezzo">
       <template #body="slotProps">
-        <img class="w-2rem shadow-2 border-round" :src="slotProps.data.storeItemType.picturePath"/><br/>
-        {{ (slotProps.data.storeItemType.name) }} - taglia {{ (slotProps.data.size) }} - quantità {{ (slotProps.data.quantity) }}  
-      </template>
-      
-    </Column>
-    <Column class="smartcol" v-if="!store.smartphone" field="size" header="Taglia"></Column>
-    <Column class="smartcol" field="storeItemType.price" header="Prezzo">
-      <template #body="slotProps">
-           € {{ (slotProps.data.storeItemType.price) }}
+           € {{ (slotProps.data.storeItem.price) }}
         </template>
     </Column>
-    <Column class="smartcol" v-if="!store.smartphone" field="quantity" header="Quantità"></Column>
+    <Column class="smartcol" field="quantity" header="Quantità"></Column>
     <Column class="smartcol" header="Azioni">
         <template #body="slotProps">
             <Button v-if="!cartConfirmed" icon="pi pi-trash" raised severity="danger" rounded aria-label="Cancel" @click="removeItemFromCart(slotProps.index, slotProps.data)" ></Button>
         </template>
     </Column>
-    <template #footer> Prezzo totale accessori e abbigliamento: € {{store.cart.totalPriceItem }}  </template>
+    <template #footer> Prezzo totale : € {{store.cart.price }}  </template>
 
-</DataTable>
-
-<Card v-if="store.cart.itemNumber> 0"><template #title> Totale carrello: <span class="text-2xl">€ {{store.cart.globalTotalPrice }}</span> </template></Card>
-  
+</DataTable> 
 <Card class="mt-2" v-if="cartConfirmed">
   <template #title>Pagamento </template>
   <template #content>
@@ -150,6 +142,7 @@ import Card from 'primevue/card';
 import { useStore } from '@/stores/store';
 import { orderService } from '@/stores/orderService';
 import { storeItemService } from '@/stores/storeItemService';
+import InputNumber from 'primevue/inputnumber';
 //import {format, parse, add, lastDayOfMonth, startOfHour} from 'date-fns';
 import InlineMessage from 'primevue/inlinemessage';
 import Image from 'primevue/image';
@@ -166,15 +159,12 @@ export default {
       viewCart:false,
       cartConfirmed: false,
       itemToBuy: null,
-      newStoreItem:{
+      selectedStoreItem:{
         storeItem:null,
         size:null,
         quantity:null
       },
       storeItemSize: [],
-      storeItemQuantity: [],
-      selectedType: null,
-      selectedItem: null,
       storeItems: [],
       paymentMethods: ['Carta di credito', 'Bonifico','In contrassegno'],
       paymentMethod: null,
@@ -187,7 +177,7 @@ export default {
     return {store};
   },
   components: {
-    DataView,Card, TabPanel, TabView, Button, Dialog, InputText, Calendar, Badge, Tag, DataTable, Column , InlineMessage, SelectButton,Image,Dropdown
+    DataView,Card, InputNumber, TabPanel, TabView, Button, Dialog, InputText, Calendar, Badge, Tag, DataTable, Column , InlineMessage, SelectButton,Image,Dropdown
   },
   props: {
      
@@ -197,8 +187,8 @@ export default {
     
     
     storeItemService().getStoreItem().then((data)=> {
-      //this.storeItems = data;
-      this.storeItems = [{name: "Mug", picturePath: "/storeitems/mug.png", price: "8" }]
+      this.storeItems = data;
+      //this.storeItems = [{name: "Mug", picturePath: "/storeitems/mug.png", price: "8" }]
       
       console.log("this.storeItems");
       console.log(this.storeItems);
@@ -211,25 +201,26 @@ export default {
     
     createStoreItem: function(s){
       if(!this.cartConfirmed) {
-        storeItemService().getSizeForStoreItem(s.name).then((data)=>{
+        storeItemService().getSizeForStoreItem(s.storeItemId).then((data)=>{
           this.storeItemSize=data;
         }).catch(e=>{});
-        storeItemService().getSizeForStoreItem(s.name).then((data)=>{
-          this.storeItemSize=data;
-        }).catch(e=>{});
+
 
 
         console.log("stampo l'item selezionato");
         console.log(s);
         console.log(s.name);
-        this.newStoreItem={
+        this.selectedStoreItem={
           size:null,
-          quantity: null,
-          storeItem:null
+          quantity: 1,
+          storeItem: null
         };
-        this.newStoreItem.storeItem=s;
-        console.log(this.newStoreItem);
-        this.selectedItem=s;
+        this.selectedStoreItem.storeItem=s;
+
+        if(this.storeItemSize.length == 1) {
+          this.selectedStoreItem.size = this.storeItemSize[0];
+        }
+        console.log(this.selectedStoreItem);
         this.showDialogItem=true;
 
       }else {
@@ -238,27 +229,40 @@ export default {
 
     },
 
-    getQuantityForStoreItemType: function(event){
-      var name=this.selectedItem.name;
-      var size=this.newStoreItem.size;
-      storeItemService().getQuantityForStoreItem(name,size).then((data=>{
-         this.storeItemQuantity=data;
-         console.log(this.storeItemQuantity);
-      })).catch(e=>{});
 
+    getQuantityForSize: function(event){
+      var size=this.selectedStoreItem.size;
+      console.log("size selected ");
+      console.log(size);
+      if(size.stockQuantity==0) {
+        this.selectedStoreItem.quantity =0;
+      }
     },
 
+   
     
     saveStoreItem : function(){
       console.log("SAVE ITEM TO CART");
-      console.log(this.newStoreItem);
+      console.log(this.selectedStoreItem);
+      
+      var size=this.selectedStoreItem.size;
+      console.log("size quantity "+size.stockQuantity);
+      var quantity=this.selectedStoreItem.quantity;
+      console.log("input quantity "+quantity);
+      
+      if(quantity > size.stockQuantity) {
+        this.selectedStoreItem.quantity = size.stockQuantity;
+        useStore().alerts = ["Attenzione la quantità massima ordinabile è "+size.stockQuantity];
+        return;
+      }
+     
       this.showDialogItem = false;
       if(!this.cartConfirmed){
-      useStore().addItemToCart(this.newStoreItem);
+        useStore().addItemToCart(this.selectedStoreItem);
       }else {
         useStore().alerts = ["Il carrello è confermato in attesa di pagamento"];
       }
-      this.newStoreItem={
+      this.selectedStoreItem={
           size:null,
           quantity: null,
           storeItem:null

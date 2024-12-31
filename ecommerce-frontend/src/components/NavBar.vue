@@ -8,7 +8,8 @@
     </template>
     <template #end>
         <div class="flex align-items-center gap-2">
-          <i v-if="store.user" :v-badge="store.cart.itemNumber" @click="store.showCart()" class="pi pi-shopping-cart mx-2" style="font-size: 2rem" />
+          <i v-if="store.user && store.cart.items.length>0" v-badge="store.cart.items.length" @click="store.showCart()" class="pi pi-shopping-cart mx-2" style="font-size: 2rem" />
+          <i v-if="store.user && store.cart.items.length==0" class="pi pi-shopping-cart mx-2" style="font-size: 2rem" />
           <a v-if="store.user" class="nav-link " id="dropdownMenuUser" @click="toggleMenuUser" aria-haspopup="true" aria-controls="overlay_menu" href="#" >
             <Avatar icon="pi pi-user" class="mr-2" size="large" shape="circle"
                   :aria-label="store.user.name +' '+store.user.surname" />

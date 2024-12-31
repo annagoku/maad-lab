@@ -31,8 +31,8 @@ export const storeItemService = defineStore('storeItemService', {
       }
     }, 
 
-    async getSizeForStoreItem(name){
-      const url = serverBaseUrl+"/storeItemType/"+name+"/size";
+    async getSizeForStoreItem(storeItemId){
+      const url = serverBaseUrl+"/store/"+storeItemId+"/sizes";
       const store = useStore();
       store.loading = true;
       try {
@@ -46,21 +46,6 @@ export const storeItemService = defineStore('storeItemService', {
       }
     }, 
 
-    async getQuantityForStoreItem(name,size){
-      const url = serverBaseUrl+"/storeItemType/"+name+"/quantity/"+size;
-      const store = useStore();
-      store.loading = true;
-      try {
-        const response = await axios.get(url);
-        store.loading = false;
-        console.log(response.data)
-
-        return response.data;
-      } catch (error) {
-        store.loading = false;
-        store.alerts = ["Impossibile recuperare i dati. Riprovare più tardi"];
-        
-      }
-    }
+    
   },
 })

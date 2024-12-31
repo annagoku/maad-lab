@@ -20,6 +20,7 @@
 <script>
 import { useStore } from '@/stores/store'
 import { userService } from '@/stores/userService'
+import { cartService } from '@/stores/cartService'
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
@@ -62,7 +63,16 @@ export default {
         this.errorMessage = "Credenziali errate";
       }
       console.log("CHIAMO IL SERVIZIO con "+this.username + " "+this.password);
-      userService().login(this.username, this.password);
+      userService().login(this.username, this.password).then(() => {
+        cartService().getCart().then((data) => {
+          this.store.cart=data;
+          
+        }).catch((error) => {
+          this.store.clearCart();
+        });
+          
+      });
+          
       this.isSubmitting = false; // Re-enable the submit button
       this.store.loading = false;
     },

@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios';
 import { faRupiahSign } from '@fortawesome/free-solid-svg-icons';
+import { cartService } from '@/stores/cartService'
 
 export const useStore = defineStore('store', {
   state: () => ({ 
@@ -12,7 +13,7 @@ export const useStore = defineStore('store', {
     showCartDialog: false,
     cart: {
       items: [],
-      globalTotalPrice: 0.0,
+      price: 0.0,
       itemNumber: 0
     },
   }),
@@ -44,17 +45,25 @@ export const useStore = defineStore('store', {
     addItemToCart(item) {
       this.cart.items.push(item);
       this.cart.itemNumber+=item.quantity;
-      this.cart.globalTotalPrice += (item.storeItemType.price*item.quantity);
+      this.cart.price += (item.storeItem.price*item.quantity);
+      cartService().updateCart(this.cart);
     },
     removeItemFromCart(index, item){
       this.cart.items.splice(index,1);
       this.cart.itemNumber=this.cart.itemNumber-(item.quantity);
-      this.cart.globalTotalPrice=this.cart.globalTotalPrice-(item.storeItemType.price*item.quantity);
+      this.cart.price=this.cart.price-(item.storeItem.price*item.quantity);
+      if(this.cart.items.length == 0) {
+        //TODO fare il backend per rimuovere il carrello dal server
+      }
+      else {
+        cartService().updateCart(this.cart);
+      }
+      
     },
     clearCart() {
       this.cart = {
         items: [],
-        globalTotalPrice: 0.0,
+        price: 0.0,
         itemNumber: 0
       };
     }

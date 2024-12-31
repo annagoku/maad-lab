@@ -36,17 +36,9 @@ public class StoreItem {
     @JsonProperty
     private String description;
 
-    @Column( name = "size")
-    @JsonProperty
-    private String size;
-
     @Column( name = "price")
     @JsonProperty
     private double price;
-
-    @Column( name = "stock-quantity")
-    private int stockQuantity;
-
 
     @Column( name = "picture-path")
     @JsonProperty
@@ -54,9 +46,9 @@ public class StoreItem {
 
 
 
-//    @OneToMany(mappedBy = "storeItemType")
-//    @JsonIgnore
-//    private List<StoreItem> storeItems;
+   @OneToMany(mappedBy = "storeItem")
+   @JsonIgnore
+   private List<StockItem> stockItems;
 
 }
 

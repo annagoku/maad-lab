@@ -25,7 +25,7 @@ public class ShoppingCart {
     }
     public void addItem(ShoppingCartItem ci) {
         items.add(ci);
-        price += ci.getPrice();
+        price += ci.getQuantity()*ci.getSize().getStoreItem().getPrice();
     }
 
     public String redisKey() {
