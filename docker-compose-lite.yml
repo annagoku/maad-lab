@@ -41,23 +41,16 @@ services:
       - redis-data:/data
     networks: 
       - ecommerce-network
-        
-  redis-commander:
-    image: rediscommander/redis-commander:latest
+  redis-insight:
+    image: redis/redisinsight
+    container_name: ecommerce-redisinsight
     restart: always
-    environment:
-      REDIS_HOSTS: redis
-      REDIS_HOST: redis
-      REDIS_PORT: redis:6379
-      #REDIS_PASSWORD: ${REDIS_PASSWORD}
-      #HTTP_USER: admin
-      #HTTP_PASSWORD: root
     ports:
-      - 8081:8081
-    networks:
-      - ecommerce-network
-
-
+      - 5540:5540
+    volumes:
+      - redis-insight-data:/db
+    networks: 
+      - ecommerce-network    
 
 networks:
   ecommerce-network:
@@ -67,3 +60,4 @@ volumes:
   ecommerce-data:
   pg-admin-data:
   redis-data:
+  redis-insight-data:

@@ -1,13 +1,13 @@
 
 <template>
   <div class="container">
-    <DataView layout="grid" :value="storeItems" >
+    <DataView :layout="layout" :value="storeItems" >
       <template #grid="slotProps">
-        
+        <div class="grid grid-nogutter">
         <div v-for="item in slotProps.items" class="col-4 p-2">
               <div class="p-4 border-1 surface-border surface-card border-round">
                 <div class="flex flex-column align-items-center gap-3 py-5">
-                     <div class="text-2xl font-bold"><img class="w-10rem shadow-2 border-round" :src="item.picturePath"/></div>
+                     <div class="md:w-10rem relative"><img class="w-10rem h-10rem shadow-2 border-round" :src="item.picturePath"/></div>
                   </div>
                   <div class="flex flex-column align-items-center gap-3 py-5">
                       <div class="text-2xl font-bold">{{ item.name }}</div>
@@ -19,6 +19,7 @@
                       <Button :disabled="!store.user" icon="pi pi-shopping-cart" rounded @click.stop.prevent="createStoreItem(item)"></Button>
                   </div>
               </div>
+        </div>
         </div>
       </template>
     </DataView>   
@@ -60,19 +61,21 @@
       </template>
 </Dialog>
 
+
+
 <!-- DIALOG CARRELLO -->
 <Dialog v-model:visible="store.showCartDialog" modal header="Carrello acquisti" :style="{ width: '75vw' }" :breakpoints="{ '960px': '75vw', '641px': '100vw' }">
   <template #header>
     <div class="row">
       <div class="col-xs-12 ">
         <span class="font-bold text-2xl mr-4">Carrello Acquisti</span>
-        <Button v-if="!cartConfirmed && store.cart.itemNumber> 0" icon="pi pi-trash" text raised rounded severity="danger" v-tooltip="'Svuota il carrello'" aria-label="Clear" @click="clearCart" ></Button>    
+        <Button v-if="!cartConfirmed && store.cart.items.length> 0" icon="pi pi-trash" text raised rounded severity="danger" v-tooltip="'Svuota il carrello'" aria-label="Clear" @click="clearCart" ></Button>    
       </div>
       
     </div>
     
   </template>
-  <InlineMessage severity="info" v-if="store.cart.itemNumber== 0">Il carrello è vuoto</InlineMessage>
+  <InlineMessage severity="info" v-if="store.cart.items.length== 0">Il carrello è vuoto</InlineMessage>
   
 
 
@@ -101,18 +104,28 @@
 
 </DataTable> 
 <Card class="mt-2" v-if="cartConfirmed">
-  <template #title>Pagamento </template>
+  <template #title>Scelta modalità di spedizione e pagamento</template>
   <template #content>
   <SelectButton :options="paymentMethods" v-model="paymentMethod"></SelectButton>
+
+  <label for="shippingAddress">Indirizzo</label>
+  <InputText id="shippingAddress" v-model="shippingDetails.address"  />
+  <label for="shippingCity">Città</label>
+  <InputText id="shippingCity" v-model="shippingDetails.city"  />
+  <label for="shippingProvince">Provincia</label>
+  <InputText id="shippingProvince" v-model="shippingDetails.province"  />
+  <label for="shippingZipcode">CAP</label>
+  <InputText id="shippingZipcode" v-model="shippingDetails.zipcode"  />
+    
 
   </template>
   
 </Card>
 
     <template #footer>
-        <Button label="Chiudi"  @click="store.hideCart()"  text />
-        <Button v-if="!cartConfirmed && store.cart.itemNumber> 0" label="ACQUISTA" @click="confirmPurchase"  autofocus />
-        <Button v-if="cartConfirmed" label="Conferma Pagamento" @click="confirmPayment"  autofocus />
+        <Button label="Chiudi"  @click="closeCart"  text />
+        <Button v-if="!cartConfirmed && store.cart.items.length>0" label="Acquista" @click="confirmPurchase"  autofocus />
+        <Button v-if="cartConfirmed" label="Conferma Acquisto" @click="sendOrder"  autofocus />
     </template>
 </Dialog>
 
@@ -168,7 +181,13 @@ export default {
       storeItems: [],
       paymentMethods: ['Carta di credito', 'Bonifico','In contrassegno'],
       paymentMethod: null,
-      orderId: null
+      shippingDetails: {
+        address: null,
+        city: null,
+        province: null,
+        zipcode: null
+      },
+      
 
     };
   },
@@ -238,7 +257,17 @@ export default {
         this.selectedStoreItem.quantity =0;
       }
     },
-
+    closeCart : function() {
+      this.cartConfirmed = false;
+      this.paymentMethod = null;
+      this.shippingDetails= {
+        address: null,
+        city: null,
+        province: null,
+        zipcode: null
+      };
+      useStore().hideCart();
+    },
    
     
     saveStoreItem : function(){
@@ -306,41 +335,37 @@ export default {
     },
     confirmPurchase: function () {
       console.log("confirm purchase");
-      this.paymentMode = null;
-
-      this.sendOrder();
-      
-
-    },
-
-    sendOrder: function () {
-      const store = useStore();
-
-      var order = {
-        user: {
-          email: store.user.email
-        },
-        items: store.cart.items,
+      this.paymentMethod = null;
+      this.cartConfirmed = true;
+      this.shippingDetails= {
+        address: null,
+        city: null,
+        province: null,
+        zipcode: null
       };
 
-
-      orderService().sendOrder(order).then((data) => {
-        this.cartConfirmed = true;
-        this.orderId = data.orderId;
-      });
     },
 
-    confirmPayment: function() {
+  
+
+    sendOrder: function() {
       if(this.paymentMethod == null) {
         useStore().alerts = ["Selezionare un methodo di pagamento"];
         return;
       }
-      orderService().orderPayment(this.orderId, this.paymentMethod).then(() => {
+      orderService().sendOrder(useStore().cart, this.paymentMethod, this.shippingDetails).then((data) => {
         this.paymentMethod = null;
-        var msg="Pagamento andato a buon fine. L'ordine "+this.orderId+" è consultabile nella sezione Ordini";
-        this.orderId=null;
-        this.cartConfirmed=false;
-        this.clearCart();
+        this.cartConfirmed = false;
+        this.shippingDetails= {
+          address: null,
+          city: null,
+          province: null,
+          zipcode: null
+        };
+        var msg="Pagamento andato a buon fine. L'ordine "+data.orderId+" è consultabile nella sezione Ordini";
+        
+        useStore().clearCartAfterOrder();
+        useStore().hideCart();
         useStore().messages = [msg];
       });
 

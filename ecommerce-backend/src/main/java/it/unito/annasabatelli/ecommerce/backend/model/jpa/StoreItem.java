@@ -49,6 +49,8 @@ public class StoreItem {
    @OneToMany(mappedBy = "storeItem")
    @JsonIgnore
    private List<StockItem> stockItems;
-
+    @OneToMany(mappedBy = "storeItem")
+    @JsonIgnore
+    private List<OrderedItem> orderItems;
 }
 

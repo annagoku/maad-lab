@@ -6,6 +6,7 @@ import { cartService } from '@/stores/cartService'
 
 export const useStore = defineStore('store', {
   state: () => ({ 
+    showLoginDialog: false,
     user: null,
     loading: false,
     alerts: [],
@@ -42,6 +43,13 @@ export const useStore = defineStore('store', {
     hideCart() {
       this.showCartDialog = false;
     },
+    showLogin() {
+      console.log("mostro il login")
+      this.showLoginDialog = true;
+    },
+    hideLogin() {
+      this.showLoginDialog = false;
+    },
     addItemToCart(item) {
       this.cart.items.push(item);
       this.cart.itemNumber+=item.quantity;
@@ -53,7 +61,7 @@ export const useStore = defineStore('store', {
       this.cart.itemNumber=this.cart.itemNumber-(item.quantity);
       this.cart.price=this.cart.price-(item.storeItem.price*item.quantity);
       if(this.cart.items.length == 0) {
-        //TODO fare il backend per rimuovere il carrello dal server
+        cartService().deleteCart();
       }
       else {
         cartService().updateCart(this.cart);
@@ -66,6 +74,15 @@ export const useStore = defineStore('store', {
         price: 0.0,
         itemNumber: 0
       };
-    }
+      cartService().deleteCart();
+    },
+    clearCartAfterOrder() {
+      this.cart = {
+        items: [],
+        price: 0.0,
+        itemNumber: 0
+      };
+      
+    },
   },
 })

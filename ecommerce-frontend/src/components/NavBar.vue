@@ -4,12 +4,12 @@
   
     <Menubar id="navbar" class="fixed-top bg-light py-3">
     <template #start>
-      <a href="/#" @click="goToHomePublic()"><img :src="logoInverted" style="zoom: 20%">  {{title}}</a>
+      <span class="pointer" @click="goToHomePublic()"><img :src="logoInverted" style="zoom: 20%">  {{title}}</span>
     </template>
     <template #end>
         <div class="flex align-items-center gap-2">
           <i v-if="store.user && store.cart.items.length>0" v-badge="store.cart.items.length" @click="store.showCart()" class="pi pi-shopping-cart mx-2" style="font-size: 2rem" />
-          <i v-if="store.user && store.cart.items.length==0" class="pi pi-shopping-cart mx-2" style="font-size: 2rem" />
+          <i v-if="store.user && store.cart.items.length==0" class="pointer pi pi-shopping-cart mx-2" @click="store.showCart()" style="font-size: 2rem" />
           <a v-if="store.user" class="nav-link " id="dropdownMenuUser" @click="toggleMenuUser" aria-haspopup="true" aria-controls="overlay_menu" href="#" >
             <Avatar icon="pi pi-user" class="mr-2" size="large" shape="circle"
                   :aria-label="store.user.name +' '+store.user.surname" />
@@ -23,11 +23,14 @@
                   </template>
                 
                 </Menu>
-
+          <Button v-if="!store.user" label="Login" icon-pos="right" icon="pi pi-sign-in"  raised rounded  @click="store.showLogin()" ></Button>
+          
         </div>
     </template>
 </Menubar>
   </header>
+
+
 </template>
 
 <script>
@@ -36,7 +39,11 @@ import { useStore } from '@/stores/store'
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import Menu from 'primevue/menu';
+import Dialog from 'primevue/dialog';
+import InputText from 'primevue/inputtext';
+import Message from 'primevue/message';
 import Menubar from 'primevue/menubar';
+
 
 
 export default {
@@ -70,7 +77,7 @@ export default {
   },
 
   components: {
-    Avatar, Menu, Menubar, Button
+    Avatar, Menu, Menubar, Dialog, Button, InputText, Message
   },
   props: {
     title: String
@@ -111,6 +118,10 @@ export default {
       var y = elem.getBoundingClientRect().top-50+window.scrollY;
       console.log("scroll to y = "+y)
       window.scroll(0, y);
+    },
+    showLogin () {
+      console.log("Mostro il login");
+      useStore().showLogin = true;
     },
     logout ()  {
 

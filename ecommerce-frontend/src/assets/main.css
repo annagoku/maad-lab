@@ -141,7 +141,7 @@ color: #777;
 
 
 .home-jumbotron-spacer {
-  padding-top: 700px;
+  padding-top: 300px;
 }
 
 .intro-section {
@@ -156,7 +156,7 @@ color: #777;
 .slide {
   padding-top: 50px;
    color: white;
-    height: 655px;
+    height: 360px;
    
  }
 .slide-section {
@@ -168,9 +168,6 @@ color: #777;
   margin-bottom: 1rem!important;
 }
 @media (min-width: 768px) {
-  .home-jumbotron-spacer {
-    padding-top: 700px;
-  }
   .intro-section {
     background-position: 50% -25px;
   }

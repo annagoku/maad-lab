@@ -29,6 +29,9 @@ public class CartService {
         }
     }
 
+    public boolean deleteCart(String email) {
+        return redisTemplate.delete(ShoppingCart.REDIS_KEY_PREFIX+email);
+    }
     public ShoppingCart addItem(String email, ShoppingCartItem ci) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         String json = redisTemplate.opsForValue().get(ShoppingCart.REDIS_KEY_PREFIX+email);

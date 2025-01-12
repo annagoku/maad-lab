@@ -9,6 +9,7 @@ import lombok.Setter;
 
 @Getter @Setter @NoArgsConstructor
 @Entity
+@Table(name = "order-items")
 public class OrderedItem {
 
     @Id
@@ -21,8 +22,10 @@ public class OrderedItem {
     @Column( name = "quantity")
     private int quantity;
 
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.EAGER,optional=true, cascade=CascadeType.ALL)
+    @Column( name = "size")
+    private String size;
+    //@JsonBackReference
+    @ManyToOne(fetch = FetchType.EAGER,optional=true, cascade=CascadeType.MERGE)
     @JoinColumn(name ="storeItemId")
     private StoreItem storeItem;
 

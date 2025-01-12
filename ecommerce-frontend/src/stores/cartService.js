@@ -58,6 +58,20 @@ export const cartService = defineStore('cartService', {
       }
     },
     
+    async deleteCart(){
+      const store = useStore();
+      const url = serverBaseUrl+"/cart/"+store.user.email;
+      store.loading = true;
+      try {
+        const response = await axios.delete(url);
+        store.loading = false;
+        return response.data;
+      } catch (error) {
+        store.loading = false;
+        store.alerts = ["Impossibile aggiornare il carrello "+error.response.data.errorMessage];
+        throw error;
+      }
+    }
 
     
   },

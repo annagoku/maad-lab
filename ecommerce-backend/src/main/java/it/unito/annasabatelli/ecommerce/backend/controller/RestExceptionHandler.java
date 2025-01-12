@@ -28,6 +28,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {Exception.class })
     protected ResponseEntity<Object> handleException(
             RuntimeException ex, WebRequest request) {
+        LOGGER.error("Exception occurred: "+ex.getMessage(), ex);
 
         ErrorDetails error = new ErrorDetails();
         error.setErrorMessage(ex.getMessage());
