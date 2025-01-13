@@ -74,6 +74,12 @@ color: #777;
 cursor: pointer;
 }
 
+.shipping-container {
+  display: flex;
+  flex-wrap: nowrap; /* Per mantenere tutto su una riga */
+  
+}
+
 .form-label-group input:-webkit-autofill ~ label {
 padding-top: .25rem;
 padding-bottom: .25rem;

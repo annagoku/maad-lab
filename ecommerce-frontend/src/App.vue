@@ -8,6 +8,7 @@ import NavBar from './components/NavBar.vue'
 import Footer from './components/Footer.vue'
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
+import Message from 'primevue/message';
 import InlineMessage from 'primevue/inlinemessage';
 import Button from 'primevue/button';
 import ProgressSpinner from 'primevue/progressspinner';
@@ -98,7 +99,7 @@ export default {
         console.log("CHIAMO IL SERVIZIO con "+this.username + " "+this.password);
         userService().login(this.username, this.password).then(() => {
           cartService().getCart().then((data) => {
-            this.store.cart=data;
+            useStore().cart=data;
             this.isLoginSubmitting = false;
         
           }).catch((error) => {

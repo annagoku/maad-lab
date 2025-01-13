@@ -24,6 +24,7 @@ public class CartService {
         else {
             ObjectMapper mapper = new ObjectMapper();
             ShoppingCart c = mapper.readValue(json, ShoppingCart.class);
+            log.info("CARRELLO: "+c);
             return c;
 
         }
