@@ -28,19 +28,15 @@ services:
     networks: 
       - ecommerce-network
         
-  redis-commander:
-    image: rediscommander/redis-commander:latest
+  redis-insight:
+    image: redis/redisinsight
+    container_name: ecommerce-redisinsight
     restart: always
-    environment:
-      REDIS_HOSTS: redis
-      REDIS_HOST: redis
-      REDIS_PORT: redis:6379
-      #REDIS_PASSWORD: ${REDIS_PASSWORD}
-      #HTTP_USER: admin
-      #HTTP_PASSWORD: root
     ports:
-      - 8081:8081
-    networks:
+      - 5540:5540
+    volumes:
+      - redis-insight-data:/data
+    networks: 
       - ecommerce-network
 
   pgadmin:
@@ -55,17 +51,18 @@ services:
     ports: 
         - "16543:80" #porta esposta dal c : immagine esposta dall'immagine
     depends_on: 
-        - postgres  
+        - postgres 
 
   
   ecommerce-backend:
     build: ./ecommerce-backend
     container_name: ecommerce-backend
     environment:
-      - DB_SERVER=ecommerce
-      - POSTGRES_DB=postgres
+      - DB_SERVER=ecommerce-postgres
+      - POSTGRES_DB=ecommerce
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
+      - REDIS_SERVER=ecommerce-redis
     networks:
         - ecommerce-network
     ports:
@@ -73,15 +70,15 @@ services:
     depends_on:
       - postgres
   
-  #ecommerce-frontend:
-  #  build: ./ecommerce-frontend
-  #  container_name: ecommerce-frontend
-  #  ports:
-  #      - 5173:5173
-  #  networks:
-  #      - ecommerce-network
-  #  depends_on:
-  #    - ecommerce-backend
+  ecommerce-frontend:
+    build: ./ecommerce-frontend
+    container_name: ecommerce-frontend
+    ports:
+        - 5173:5173
+    networks:
+        - ecommerce-network
+    depends_on:
+      - ecommerce-backend
 
 networks:
   ecommerce-network:
@@ -91,3 +88,4 @@ volumes:
   ecommerce-data:
   pg-admin-data:
   redis-data:
+  redis-insight-data:

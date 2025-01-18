@@ -48,7 +48,7 @@ services:
     ports:
       - 5540:5540
     volumes:
-      - redis-insight-data:/db
+      - redis-insight-data:/data
     networks: 
       - ecommerce-network    
 
